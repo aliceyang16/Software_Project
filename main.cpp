@@ -46,7 +46,6 @@ int main()
 	sf::Sprite bullet;
 	bullet.setTexture(shooterImage);
 	bullet.scale(bulletScale);
-	//bullet.setOrigin(shooterSize/ 2.f);
 	
 	/** Load the text font*/
     sf::Font font;
@@ -70,6 +69,7 @@ int main()
 	
 	sf::Clock clock;
 	bool isPlaying = false;
+	bool bulletShot = false;
 	while(window.isOpen())
 	{
 		// Handle events
@@ -104,7 +104,6 @@ int main()
 		if (isPlaying)
 		{
 			float deltaTime = clock.restart().asSeconds();
-			
             // Move the player's paddle
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) &&
                (player.getPosition().y - playerSize.y / 2 > 5.f))
@@ -129,9 +128,13 @@ int main()
 			
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 			{
-				
+				bulletShot = true;
 				bullet.setPosition(player.getPosition().x, player.getPosition().y);
 				//bullet.setPosition(gameWidth / 2, gameHeight / 2);
+			}
+			
+			if(bulletShot)
+			{
 				float factor = bulletSpeed * deltaTime;
 				bullet.move(std::cos(bulletAngle) * factor, std::sin(bulletAngle) * factor);
 			}
@@ -144,7 +147,10 @@ int main()
         {
             // Draw the paddles and the ball
             window.draw(player);
-			window.draw(bullet);
+			if(bulletShot)
+			{
+				window.draw(bullet);
+			}
         }
         else
         {
