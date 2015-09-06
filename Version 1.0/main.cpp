@@ -3,8 +3,11 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include <vector>
 
 /// \return Application exit code
+
+using namespace std;
 
 int main()
 {
@@ -16,6 +19,7 @@ int main()
 	sf::Vector2f playerSize(50, 50);
 	sf::Vector2f shooterSize(20,20);
 	sf::Vector2f bulletScale(0.05,0.05);
+	sf::Vector2f enemyScale(1,1);
 	
 	// Create the window of the application
     sf::RenderWindow window(sf::VideoMode(gameWidth, gameHeight, 32), "Shooter Game",
@@ -38,11 +42,24 @@ int main()
 	player.setTexture(playerImage);
     player.setOrigin(playerSize / 2.f);
 	
+	/** Load image of enemy player*/
+	sf::Texture enemyImage;
+	if (!enemyImage.loadFromFile("resources/evil_minion.png"))
+		return EXIT_FAILURE;
+		
+	/** Create the enemy*/
+	sf::Sprite enemy;
+	enemy.setTexture(enemyImage);
+	enemy.setOrigin(playerSize / 2.f);
+	enemy.scale(enemyScale);
+	
+	
 	/** Load the image of the shooter*/
 	sf::Texture shooterImage;
 	if (!shooterImage.loadFromFile("resources/banana.png"))
 		return EXIT_FAILURE;
 	
+	/** Create a bullet */
 	sf::Sprite bullet;
 	bullet.setTexture(shooterImage);
 	bullet.scale(bulletScale);
@@ -64,6 +81,7 @@ int main()
 	sf::Clock AITimer;
 	const sf::Time AITime   = sf::seconds(0.1f);
 	const float playerSpeed = 400.f;
+	const float enemySpeed = 400.f;
 	const float bulletSpeed = 400.f;
 	float bulletAngle = 0.f;
 	
@@ -93,18 +111,19 @@ int main()
                     isPlaying = true;
                     clock.restart();
 
-                    // Reset the position of the player and bullet
-                    player.setPosition(gameWidth / 2, gameHeight / 2);
+                    // Reset the position of the player and enemy position
+					player.setPosition(10 + playerSize.x / 2, gameHeight / 2);
+                    enemy.setPosition(gameWidth - 10 - playerSize.x / 2, gameHeight / 2);
+                    //player.setPosition(gameWidth / 2, gameHeight / 2);
+					//enemy.setPosition(gameWidth / 2, gameHeight / 2);
                 }
             }
 		}
 		
-		
-		
 		if (isPlaying)
 		{
 			float deltaTime = clock.restart().asSeconds();
-            // Move the player's paddle
+            // Move the player
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) &&
                (player.getPosition().y - playerSize.y / 2 > 5.f))
             {
@@ -126,11 +145,20 @@ int main()
 				   player.move(-playerSpeed * deltaTime,0.f);
 			}
 			
+			// Move the enemy
+//            if (((enemySpeed < 0.f) && (enemy.getPosition().y - playerSize.y / 2 > 2.f)) ||
+//                ((enemySpeed > 0.f) && (enemy.getPosition().y + playerSize.y / 2 < gameHeight -2.f)))
+//            {
+//                enemy.move(0.f, enemySpeed * deltaTime);
+//            }
+			
+			vector<sf::Sprite> bulletVector;
+			//Shoot bullet from player
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 			{
 				bulletShot = true;
 				bullet.setPosition(player.getPosition().x, player.getPosition().y);
-				//bullet.setPosition(gameWidth / 2, gameHeight / 2);
+					
 			}
 			
 			if(bulletShot)
@@ -138,6 +166,7 @@ int main()
 				float factor = bulletSpeed * deltaTime;
 				bullet.move(std::cos(bulletAngle) * factor, std::sin(bulletAngle) * factor);
 			}
+			
 		}
 		
 		// Clear the window
@@ -147,6 +176,8 @@ int main()
         {
             // Draw the paddles and the ball
             window.draw(player);
+			window.draw(enemy);
+			
 			if(bulletShot)
 			{
 				window.draw(bullet);
